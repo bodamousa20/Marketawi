@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:marketawi/Product_provider.dart';
-import 'package:marketawi/login.dart';
-import 'package:marketawi/welcomeScreen.dart';
+import 'package:marketawi/provider/Product_provider.dart';
+import 'package:marketawi/auth/login.dart';
+import 'package:marketawi/main/welcomeScreen.dart';
 import 'package:provider/provider.dart';
 
 void main() {
