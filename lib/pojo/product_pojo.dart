@@ -63,3 +63,55 @@ class ProductImage {
     );
   }
 }
+
+
+class CartResponse {
+  final String message;
+  final CartData data;
+
+  CartResponse({required this.message, required this.data});
+
+  factory CartResponse.fromJson(Map<String, dynamic> json) {
+    return CartResponse(
+      message: json['message'],
+      data: CartData.fromJson(json['data']),
+    );
+  }
+}
+
+class CartData {
+  final int id;
+  final List<CartItem> cartItemList;
+  final double totalPrice;
+
+  CartData({required this.id, required this.cartItemList, required this.totalPrice});
+
+  factory CartData.fromJson(Map<String, dynamic> json) {
+    return CartData(
+      id: json['id'],
+      cartItemList: (json['cartItemList'] as List)
+          .map((item) => CartItem.fromJson(item))
+          .toList(),
+      totalPrice: (json['totalPrice'] as num).toDouble(),
+    );
+  }
+}
+
+class CartItem {
+  final int id;
+  final Product product;
+  final double unitPrice;
+  final int quantity;
+
+  CartItem({required this.id, required this.product, required this.unitPrice, required this.quantity});
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      id: json['id'],
+      product: Product.fromJson(json['product']),
+      unitPrice: (json['unitPrice'] as num).toDouble(),
+      quantity: json['quantity'],
+    );
+  }
+}
+

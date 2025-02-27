@@ -14,7 +14,7 @@ class WelcomeScreen extends StatefulWidget {
 class _WelcomeScreenState extends State<WelcomeScreen> {
   var pageIndex = 0;
 
-  List<Widget> _screens = [cart(), profile()];
+  List<Widget> _screens = [Cart(), profile()];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +43,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         body: pageIndex == 0
             ? home()
             : pageIndex == 1
-                ? cart()
+                ? Cart()
                 : profile(),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: pageIndex,

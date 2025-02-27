@@ -4,6 +4,7 @@ import 'package:marketawi/provider/Product_provider.dart';
 import 'package:marketawi/auth/register.dart';
 import 'package:marketawi/main/welcomeScreen.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class login extends StatefulWidget {
   const login({super.key});
@@ -47,28 +48,30 @@ class _loginState extends State<login> {
                       TextField(
                         controller: _email,
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.email, color: Colors.grey),
+                          prefixIcon:
+                              const Icon(Icons.email, color: Colors.grey),
                           hintText: 'Username or Email',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
+                                const BorderSide(color: Colors.blue, width: 2),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
+                                const BorderSide(color: Colors.blue, width: 2),
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
                       TextField(
                         controller: _password,
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.lock, color: Colors.grey),
+                          prefixIcon:
+                              const Icon(Icons.lock, color: Colors.grey),
                           suffixIcon: IconButton(
                             onPressed: () {
                               setState(() {
@@ -86,16 +89,16 @@ class _loginState extends State<login> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
+                                const BorderSide(color: Colors.blue, width: 2),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                             borderSide:
-                                BorderSide(color: Colors.blue, width: 2),
+                                const BorderSide(color: Colors.blue, width: 2),
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
                       InkWell(
@@ -103,33 +106,36 @@ class _loginState extends State<login> {
                           await provider.login(_email.text, _password.text);
 
                           if (provider.login_message == "SUCCESS") {
-                            //NAVIGATE
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("Registration Successful! Redirecting..."),
-                                  backgroundColor: Colors.green,
-                                  duration: Duration(seconds: 3), // Show message for 3 seconds
-                                ),
+                              const SnackBar(
+                                content:
+                                    Text("Login Successful! Redirecting..."),
+                                backgroundColor: Colors.green,
+                                duration: Duration(seconds: 3),
+                              ),
                             );
-                            Future.delayed(Duration(seconds: 3), () {
-                            Navigator.push(
+
+                            Future.delayed(const Duration(seconds: 3), () {
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => WelcomeScreen(name: provider.userName.toString(),)));
+                                  builder: (context) => WelcomeScreen(
+                                    name: provider.userName.toString(),
+                                  ),
+                                ),
+                              );
                             });
-                          }
-                          else {
-                            print("main " + provider.login_message.toString());
+                          } else {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Error Email Or Password Is Incorrect..."),
+                              const SnackBar(
+                                content: Text(
+                                    "Error: Email or Password is incorrect."),
                                 backgroundColor: Colors.red,
-                                duration: Duration(seconds: 3), // Show message for 3 seconds
+                                duration: Duration(seconds: 3),
                               ),
                             );
                           }
-
-                          },
+                        },
                         child: Container(
                           width: MediaQuery.of(context).size.width,
                           height: 48, // Adjusted height
@@ -137,7 +143,7 @@ class _loginState extends State<login> {
                             borderRadius: BorderRadius.circular(10),
                             color: const Color.fromRGBO(54, 105, 201, 1),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               "Log In",
                               style: TextStyle(
@@ -148,7 +154,7 @@ class _loginState extends State<login> {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
                       Row(
@@ -165,10 +171,10 @@ class _loginState extends State<login> {
                             onTap: () {
                               Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => register())
-                              );
+                                  MaterialPageRoute(
+                                      builder: (context) => register()));
                             },
-                            child: Text("register?",
+                            child: const Text("register?",
                                 style: TextStyle(
                                     color: Colors.blue,
                                     fontSize: 16,
@@ -176,10 +182,9 @@ class _loginState extends State<login> {
                           )
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 12,
                       ),
-
                     ],
                   ),
                 ),

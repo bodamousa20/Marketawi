@@ -1,29 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:marketawi/cart/cart_details.dart';
+import 'package:provider/provider.dart';
 
-class cart extends StatelessWidget {
-  const cart({super.key});
+import '../provider/Product_provider.dart';
+
+class Cart extends StatefulWidget {
+   Cart({super.key});
+
+  @override
+  State<Cart> createState() => _CartState();
+}
+
+class _CartState extends State<Cart> {
+  @override
+  void initState() {
+    super.initState();
+      final provider = Provider.of<ProductProvider>(context, listen: false);
+
+      if (provider.userId != null) {
+        provider.getUserCart(provider.userId!);
+      } else {
+        debugPrint("Error: userId is null. Cannot fetch cart data.");
+      }
+
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ProductProvider>(context);
+
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "My Cart",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600,color: Colors.black),
+      appBar: AppBar(
+        title: const Text(
+          "My Cart",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
           ),
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          elevation: 0
         ),
-      body: Padding(
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: provider.loading
+          ? const Center(child: CircularProgressIndicator())
+          : provider.cartData == null
+          ? const Center(child: Text("Your cart is empty"))
+          : Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             Expanded(
               child: ListView.builder(
-                itemCount: 66,
+                itemCount: provider.cartData!.cartItemList.length,
                 itemBuilder: (context, index) {
+                  final cartItem = provider.cartData!.cartItemList[index];
+                  final product = cartItem.product;
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Container(
@@ -45,10 +79,12 @@ class cart extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
-                              "https://s3-alpha-sig.figma.com/img/6b3f/8893/ab73c02711e3ab3f75782fe9115b28b5?Expires=1740960000&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=pcXDjCLjUxABE5lHG57lsf1al3LbynmZgZNSLxoY2RXXPF3uiuSTTY2Ms0GxGkUvDwXU15kjKP~qV0Wp6rpYSarj8zuQoikVSJLG5GFlZVs0v79PiGUKZsVfia2tg~vYa~Dgs6b6E6~Zb70NLeSK~zoRBxTMP9EYyHT9XFq1uuTe00UDTSgH4nRaE8kcSQtTGaMuywYyJLK9WIO-YBqwPudyQgLXlizwazzZixTVIYUPnzFgaqybzgz-KKKGQ8YOHGUqcnamRNJ21P0gCrgSt6dP54CfgrMPvBfWIrTTOYUIRv-j6FM40ouTDowGeiiwdj1h-rd1SvoH8zmeJNPztg__",
+                              product.productImage!.downloadUrl,
                               width: 80,
                               height: 100,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image_not_supported, size: 80),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -56,25 +92,25 @@ class cart extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "Regular Fit T-Shirt",
-                                  style: TextStyle(
+                                Text(
+                                  product.name,
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                const Text(
-                                  "Size M",
-                                  style: TextStyle(
+                                Text(
+                                  product.brand,
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  "\$ 20",
-                                  style: TextStyle(
+                                Text(
+                                  "\$ ${product.price?.toStringAsFixed(2) ?? '0.00'}",
+                                  style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
@@ -85,9 +121,14 @@ class cart extends StatelessWidget {
                           ),
                           Column(
                             children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: const Icon(
+                              InkWell(
+                                onTap: () async{
+
+                                    await provider.deleteFromCart(provider.userId!,provider.cartData!.cartItemList[index].id);
+                                    await provider.getUserCart(provider.userId!);
+
+                                },
+                                child: const Icon(
                                   Icons.delete,
                                   color: Colors.red,
                                   size: 26,
@@ -95,19 +136,34 @@ class cart extends StatelessWidget {
                               ),
                               Row(
                                 children: [
-                                  _quantityButton(Icons.remove, () {}),
-                                  const Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 8),
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() async{
+                                        await provider.decrease(provider.userId!,provider.cartData!.cartItemList[index].id);
+                                        await provider.getUserCart(provider.userId!);
+                                      });
+                                    },
+                                    child: const Icon(Icons.remove),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
                                     child: Text(
-                                      "1",
-                                      style: TextStyle(
+                                      cartItem.quantity?.toString() ?? "1",
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  _quantityButton(Icons.add, () {}),
+                                  InkWell(
+                                    onTap: () async{
+                                      setState(() async{
+                                        await provider.increase(provider.userId!,provider.cartData!.cartItemList[index].id);
+                                        await provider.getUserCart(provider.userId!);
+                                      });
+                                    },
+                                    child: const Icon(Icons.add),
+                                  ),
                                 ],
                               ),
                             ],
@@ -122,17 +178,19 @@ class cart extends StatelessWidget {
             const SizedBox(height: 10),
             Column(
               children: [
-                cart_details(price: "\$ 5,870", text: "Sub-total"),
+                cart_details(
+                    price: "\$ ${provider.cartData?.totalPrice}",
+                    text: "Sub-total"),
                 cart_details(price: "\$ 0.00", text: "VAT (%)"),
                 cart_details(price: "\$ 80", text: "Shipping fee"),
                 const Divider(thickness: 1),
-                cart_details(price: "\$ 5,950", text: "Total"),
+                cart_details(price: "\$ ${provider.cartData?.totalPrice}", text: "Total"),
               ],
             ),
             const SizedBox(height: 15),
             InkWell(
               onTap: () {
-                print("Go to Checkout clicked");
+                debugPrint("Go to Checkout clicked");
               },
               child: Container(
                 width: double.infinity,
@@ -156,22 +214,6 @@ class cart extends StatelessWidget {
             const SizedBox(height: 20),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _quantityButton(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 0.5),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Icon(icon, size: 18),
       ),
     );
   }

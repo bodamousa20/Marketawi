@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -17,6 +18,131 @@ class ProductProvider with ChangeNotifier {
   String? login_message;
   String? userName;
   String? register_message;
+  String? message;
+  int? userId;
+  CartData? _cartData;
+
+  CartData? get cartData => _cartData;
+
+  Future<void> addProductToCart(int userId, int productId) async {
+    try {
+      final url = Uri.parse("$baseUrl/add-to-cart/$userId/$productId");
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json", // Adjust headers if needed
+        },
+      );
+      final decodedJson = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        print("added to cart");
+        message = decodedJson['message'];
+        notifyListeners();
+      } else {
+        throw Exception("Failed to load products for category");
+      }
+    } catch (e) {
+      print("Error added product to cart: $e");
+    }
+  }
+  Future<void> deleteFromCart(int userId, int productId) async {
+    try {
+      final url = Uri.parse("$baseUrl/$userId/delete/$productId");
+
+      final response = await http.delete(
+        url,
+        headers: {
+          "Content-Type": "application/json", // Adjust headers if needed
+        },
+      );
+      final decodedJson = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        print("deleted from cart");
+        message = decodedJson['message'];
+        notifyListeners();
+      } else {
+        throw Exception("Failed to delete");
+      }
+    } catch (e) {
+      print("Error added product to cart: $e");
+    }
+  }
+  Future<void> decrease(int userId, int productId) async {
+    try {
+      final url = Uri.parse("$baseUrl/$userId/decrease/$productId");
+
+      final response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json", // Adjust headers if needed
+        },
+      );
+      final decodedJson = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        message = decodedJson['message'];
+        notifyListeners();
+      } else {
+        throw Exception("Failed to decresae");
+      }
+    } catch (e) {
+    //  print("Error added product to cart: $e");
+    }
+  }
+  Future<void> increase(int userId, int productId) async {
+    try {
+      final url = Uri.parse("$baseUrl/$userId/increase/$productId");
+
+      final response = await http.put(
+        url,
+        headers: {
+          "Content-Type": "application/json", // Adjust headers if needed
+        },
+      );
+      final decodedJson = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        message = decodedJson['message'];
+        notifyListeners();
+      } else {
+        throw Exception("Failed to increae");
+      }
+    } catch (e) {
+     // print("Error added product to cart: $e");
+    }
+  }
+  Future<void> getUserCart(int userId) async {
+    try {
+      loading = true;
+      notifyListeners();
+
+      final url = Uri.parse("$baseUrl/$userId");
+      final response = await http.get(
+        url,
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        final decodedJson = json.decode(response.body);
+        _cartData = CartResponse.fromJson(decodedJson).data;
+      } else {
+        throw Exception("Failed to load cart data");
+      }
+    } catch (e) {
+      print("Error fetching cart data: $e");
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
+
+
+
+
 
   Future<void> fetchProductsByCategoryName(String categoryName) async {
     try {
@@ -76,8 +202,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> fetchCategories() async {
     try {
-      final response = await http
-          .get(Uri.parse("${baseUrl}/category/all"));
+      final response = await http.get(Uri.parse("${baseUrl}/category/all"));
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
@@ -113,8 +238,7 @@ class ProductProvider with ChangeNotifier {
 
   Future<void> fetchProductByName(String name) async {
     loading = true;
-    final url =
-        Uri.parse("${baseUrl}/product/search-name/${name}");
+    final url = Uri.parse("${baseUrl}/product/search-name/${name}");
 
     try {
       final response = await http.get(url);
@@ -152,6 +276,7 @@ class ProductProvider with ChangeNotifier {
     if (response.statusCode == 200) {
       login_message = decodedJson['message'];
       userName = decodedJson['data']['name'];
+      userId = decodedJson['data']['user_id'];
       print(login_message);
       user_token = decodedJson['data']['token'];
       print("Login Successful: ${decodedJson}");
